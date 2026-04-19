@@ -23,7 +23,9 @@ class ErrorBoundary extends Component {
     return { hasError: true };
   }
 
-  componentDidCatch() {}
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
 
   render() {
     if (this.state.hasError) {
@@ -39,7 +41,7 @@ class ErrorBoundary extends Component {
 }
 
 function MysteryGame() {
-  const [currentStage, setCurrentStage] = useState(0);
+  const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
   const [isCameraEnabled, setIsCameraEnabled] = useState(false);
@@ -47,9 +49,9 @@ function MysteryGame() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  const stage = stages[currentStage];
-  const isComplete = currentStage >= stages.length;
-  const progress = Math.min((currentStage / stages.length) * 100, 100);
+  const stage = stages[currentStageIndex];
+  const isComplete = currentStageIndex >= stages.length;
+  const progress = Math.min((currentStageIndex / stages.length) * 100, 100);
 
   useEffect(() => {
     return () => {
@@ -73,7 +75,9 @@ function MysteryGame() {
       }
       setCameraError('');
       setIsCameraEnabled(true);
-    } catch {
+    } catch (error) {
+      const safeError = error instanceof Error ? `${error.name}: ${error.message}` : 'unknown error';
+      console.error('Unable to enable camera:', safeError);
       setCameraError('Camera access was denied. You can still solve clues without it.');
     }
   };
@@ -103,7 +107,7 @@ function MysteryGame() {
     }
 
     if (normalizedAnswer === expectedAnswer) {
-      setCurrentStage((previous) => previous + 1);
+      setCurrentStageIndex((previousIndex) => previousIndex + 1);
       setUserAnswer('');
       setFeedback({ type: 'success', message: 'Correct! Moving to the next clue.' });
       return;
@@ -133,7 +137,7 @@ function MysteryGame() {
           <>
             <div className="mb-4">
               <div className="mb-2 flex items-center justify-between text-sm font-medium text-emerald-900">
-                <span>Stage {currentStage + 1} of {stages.length}</span>
+                <span>Stage {currentStageIndex + 1} of {stages.length}</span>
                 <span>{Math.round(progress)}% complete</span>
               </div>
               <div className="h-2 w-full rounded-full bg-emerald-100">
