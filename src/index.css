@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    @apply bg-stone-100 antialiased;
+    overflow-x: hidden;
+}
